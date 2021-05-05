@@ -47,6 +47,7 @@ def initialize_board(board):
 board = initialize_board(board)
 
     
+# Later: https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
 def print_piece(piece):
     if piece is None:
         print(".", end =" ")
@@ -64,4 +65,38 @@ def print_board(board):
             print_piece(board[i][j])
         print("\r")
 
+
+def move_square_to_coordinates(square):
+    col = square[0].lower()
+
+    if (col == "a"):
+        col = 0
+    elif (col == "b"):
+        col = 1
+    elif (col == "c"):
+        col = 2
+    elif (col == "d"):
+        col = 3
+    elif (col == "e"):
+        col = 4
+    elif (col == "f"):
+        col = 5
+    elif (col == "g"):
+        col = 6
+    elif (col == "h"):
+        col = 7
+    else:
+        raise('Invalid column: ' + col)
+
+    row = int(square[1])
+
+    return [row, col]
+
+def move_to_coordinates(move):
+    return move_square_to_coordinates(move[:2]), move_square_to_coordinates(move[2:4])
+
 print_board(board)
+
+first_move = input("What's your move? E.g. e4e5\n")
+print(move_to_coordinates(first_move))
+
