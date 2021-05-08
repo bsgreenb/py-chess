@@ -1,3 +1,4 @@
+from moves import *
 from enum import Enum  
 
 # Continya at https://levelup.gitconnected.com/chess-python-ca4532c7f5a4
@@ -99,145 +100,21 @@ def move_to_coordinates(move):
 
 current_turn = "white"
 
-# TODO: handle queen promotion
-# TODO: add enpassant (QSTN: is this a pawn only capture?)
-def get_pawn_moves_white(row, col):
-    pawn_moves = []
-    # Can go forward 1 step if there's no piece there
-    if board[row - 1][col] is None:
-        pawn_moves.append([row - 1, col])
-
-    # Can go forward 2 steps if on starting row and no pieces in the way    
-    if (row == 6) and board[row - 1][col] is None and board[row - 2][col] is None:
-        pawn_moves.append([row - 2, col])
-    
-    # Can take black pieces diagonal forward-left
-    if col != 0 and board[row - 1][col - 1] and board[row - 1][col - 1].team == "black":
-        pawn_moves.append([row - 1, col - 1])
-
-    # Can take black pieces diagonal forward-right
-    if col != 7 and board[row - 1][col + 1] and board[row - 1][col + 1].team == "black":
-        pawn_moves.append([row - 1, col + 1])
-
-    return pawn_moves
-
-def get_pawn_moves_black(row, col):
-    pawn_moves = []
-    # Can go forward 1 step if there's no piece there
-    if board[row + 1][col] is None:
-        pawn_moves.append([row + 1, col])
-
-    # Can go forward 2 steps if on starting row and no pieces in the way    
-    if (row == 1) and board[row + 1][col] is None and board[row + 2][col] is None:
-        pawn_moves.append([row + 2, col])
-    
-    # Can take black pieces diagonal forward-right
-    if col != 0 and board[row + 1][col - 1] and board[row + 1][col - 1].team == "white":
-        pawn_moves.append([row + 1, col - 1])
-
-    # Can take black pieces diagonal forward-left
-    if col != 7 and board[row + 1][col + 1] and board[row + 1][col + 1].team == "white":
-        pawn_moves.append([row + 1, col + 1])
-
-    return pawn_moves
-
-def get_pawn_moves(row, col):
-    if current_turn == "white":
-        return get_pawn_moves_white(row, col)
-    else:
-        return get_pawn_moves_black(row, col)
-    
-def is_valid_coordinate(row, col):
-    return row in range(8) and col in range(8)
-
-def get_knight_moves(row, col):
-    moves = []
-
-    potential_moves = [
-        [row - 2, col - 1],
-        [row - 2, col + 1],
-        [row - 1, col + 2],
-        [row - 1, col - 2],
-        [row + 1, col + 2],
-        [row + 1, col - 2],
-        [row + 2, col + 1],
-        [row + 2, col - 1]
-    ]
-
-    for potential_move in potential_moves:
-        if is_valid_coordinate(potential_move[0], potential_move[1]):
-            piece = board[potential_move[0]][potential_move[1]]
-            if piece is None or piece.team != current_turn:
-                moves.append(potential_move)
-    
-    return moves
-
-# TODO: write dis
-def get_bishop_moves(row, col):
-    return []
-
-def get_rook_moves(row, col):
-    moves = []
-
-    for horizontal_delta in (1, -1):
-        move_col = col + horizontal_delta
-        while True:
-            if not is_valid_coordinate(row, move_col):
-                break
-            else:
-                piece = board[row][move_col]
-                if piece is None:
-                    moves.append([row, move_col])
-                    move_col = move_col + horizontal_delta
-                elif piece.team != current_turn:
-                    moves.append([row, move_col])
-                    break
-                else:
-                    break
-    
-    for vertical_delta in (1, -1):
-        move_row = row + vertical_delta
-        while True:
-            if not is_valid_coordinate(move_row, col):
-                break
-            else:
-                piece = board[move_row][col]
-                if piece is None:
-                    moves.append([move_row, col])
-                    move_row = move_row + vertical_delta
-                elif piece.team != current_turn:
-                    moves.append([move_row, col])
-                    break
-                else:
-                    break
-
-    return moves
-
-def get_queen_moves(row, col):
-    moves = get_bishop_moves(row, col)
-    moves.extend(get_rook_moves(row, col))
-    
-    return moves
-
-# TODO: write dis
-def get_king_moves(row, col):
-    return []
-
 def get_piece_legal_moves(row, col):
     #TODO: add the starting coordinate so we can simplify the helpers
     piece = board[row][col]
     if piece.piece_type == "P":
-        return get_pawn_moves(row, col)
+        return get_pawn_moves(board, row, col)
     elif piece.piece_type == "N":
-        return get_knight_moves(row, col)
+        return get_knight_moves(board, row, col)
     elif piece.piece_type == "B":
-        return get_bishop_moves(row, col)
+        return get_bishop_moves(board, row, col)
     elif piece.piece_type == "R":
-        return get_rook_moves(row, col)
+        return get_rook_moves(board, row, col)
     elif piece.piece_type == "Q":
-        return get_queen_moves(row, col) # this can be bishop and rook together
+        return get_queen_moves(board, row, col) # this can be bishop and rook together
     elif piece.piece_type == "K":
-        return get_king_moves(row, col)
+        return get_king_moves(board, row, col)
 
 # TODO: incorporate checks
 def get_legal_moves():
