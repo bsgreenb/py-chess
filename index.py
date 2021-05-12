@@ -67,6 +67,8 @@ def print_board():
         for j in range(8):
             print_piece(board[i][j])
         print("\r")
+    print("Current turn: " + current_turn)
+    print("\r")
 
 
 def move_square_to_coordinates(square):
@@ -91,12 +93,12 @@ def move_square_to_coordinates(square):
     else:
         raise('Invalid column: ' + col)
 
-    row = int(square[1])
+    row = 8 - int(square[1])
 
     return [row, col]
 
 def move_to_coordinates(move):
-    return move_square_to_coordinates(move[:2]), move_square_to_coordinates(move[2:4])
+    return [move_square_to_coordinates(move[:2]), move_square_to_coordinates(move[2:4])]
 
 current_turn = "white"
 
@@ -132,15 +134,42 @@ def get_legal_moves():
 
     return legal_moves
 
+def switch_turn():
+    global current_turn
+    if current_turn == "white":
+        current_turn = "black"
+    else:
+        current_turn = "white"
+
+class IllegalMoveError(Exception):
+    pass
+
 def make_move(move):
-    print(move_to_coordinates(first_move))
+    global move_history
+    move = move_to_coordinates(move)
+    legal_moves = get_legal_moves()
+    
+    if move not in legal_moves:
+        raise IllegalMoveError
 
-print_board()
+    start_coord, end_coord = move
+    
+    board[end_coord[0]][end_coord[1]] = board[start_coord[0]][start_coord[1]]
+    board[start_coord[0]][start_coord[1]] = None
 
-print(get_legal_moves())
-
-#first_move = input("What's your move? E.g. e4e5\n")
-
-# TODO: get familiar with python debugger
+    move_history.append(move)
+    switch_turn()
 
 
+def play_game():
+    while True:
+        print_board()
+        next_move = input("What's your move? E.g. e4e5\n")
+        try:
+            make_move(next_move)
+        except IllegalMoveError:
+            print("Illegal Move!")
+
+play_game()
+
+#TODO: implement Game class, which will have board and turn variables instead of these globals
