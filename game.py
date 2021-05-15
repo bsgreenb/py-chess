@@ -2,10 +2,6 @@ from moves import *
 from piece import *
 from enum import Enum  
 
-teams = ("white", "black")
-
-# Later: https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
-
 class IllegalMoveError(Exception):
     pass
 
@@ -67,6 +63,7 @@ class Game:
         elif piece.piece_type == "K":
             return get_king_moves(self.board, row, col)
     
+    # Later: https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
     def print_piece(self, piece):
         if piece is None:
             print(".", end =" ")
