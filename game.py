@@ -5,6 +5,8 @@ from enum import Enum
 class IllegalMoveError(Exception):
     pass
 
+# CONTINYA: Make sure we can run stuff with hypothetical board
+
 class Game:
     def __init__(self, board = None):
         if board is None:
@@ -151,7 +153,7 @@ class Game:
                 self.make_move(next_move)
             except IllegalMoveError:
                 print("Illegal Move!")
-game = Game()
-game.play_game()
+# game = Game()
+# game.play_game()
 
 #TODO: implement Game class, which will have board and turn variables instead of these globals

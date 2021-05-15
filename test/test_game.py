@@ -1,5 +1,5 @@
 import unittest
-from ..game import *
+from game import *
 
 # CONTINYA: apply fix from https://stackoverflow.com/questions/67542106/relative-import-error-using-python-unittest
 
@@ -18,7 +18,7 @@ class TestGame(unittest.TestCase):
         game = Game(self.board)
         game.make_move("e2e3")
 
-        self.assertEqual(game.board[6][5], white_pawn)
+        self.assertEqual(game.board[5][4], white_pawn)
         self.assertIsNone(game.board[6][4])
 
 if __name__ == '__main__':
