@@ -114,6 +114,15 @@ class Game:
     def move_to_coordinates(self, move):
         return [self.move_square_to_coordinates(move[:2]), self.move_square_to_coordinates(move[2:4])]
 
+    def move_is_kingside_castle(self, move):
+        start_coord, end_coord = move
+
+        return self.board[start_coord[0]][start_coord[1]].piece_type == "K" and start_coord[0] == end_coord[0] and (end_coord[1] - start_coord[1] == 2)
+
+    def move_is_queenside_castle(self, move):
+        start_coord, end_coord = move
+        return self.board[start_coord[0]][start_coord[1]].piece_type == "K" and start_coord[0] == end_coord[0] and (start_coord[1] - end_coord[1] == 2)
+
     def make_move(self, move):
         move = self.move_to_coordinates(move)
         legal_moves = self.get_legal_moves()
@@ -121,10 +130,36 @@ class Game:
         if move not in legal_moves:
             raise IllegalMoveError
 
-        start_coord, end_coord = move
-        
-        self.board[end_coord[0]][end_coord[1]] = self.board[start_coord[0]][start_coord[1]]
-        self.board[start_coord[0]][start_coord[1]] = None
+        moving_piece = self.board[move[0][0]][move[0][1]]
+
+        if moving_piece.piece_type in ("K", "R"):
+            moving_piece.has_moved = True
+
+        if (self.move_is_kingside_castle(move)):
+            king = self.board[move[0][0]][move[0][1]]
+            rook = self.board[move[0][0]][move[0][1] + 3]
+
+            self.board[move[0][0]][move[0][1]] = None
+            self.board[move[0][0]][move[0][1] + 3] = None
+
+            self.board[move[0][0]][move[0][1] + 1] = rook
+            self.board[move[0][0]][move[0][1] + 2] = king
+
+        elif (self.move_is_queenside_castle(move)):
+            king = self.board[move[0][0]][move[0][1]]
+            rook = self.board[move[0][0]][move[0][1] - 4]
+
+            self.board[move[0][0]][move[0][1]] = None
+            self.board[move[0][0]][move[0][1] - 4] = None
+
+            self.board[move[0][0]][move[0][1] - 1] = rook
+            self.board[move[0][0]][move[0][1] - 2] = king
+            
+        else:
+            start_coord, end_coord = move
+            
+            self.board[end_coord[0]][end_coord[1]] = self.board[start_coord[0]][start_coord[1]]
+            self.board[start_coord[0]][start_coord[1]] = None
 
         self.move_history.append(move)
         self.switch_turn()

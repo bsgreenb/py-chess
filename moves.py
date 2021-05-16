@@ -146,6 +146,33 @@ def get_queen_moves(board, row, col):
     
     return moves
 
+def can_castle_kingside(board, king_row, king_col):
+    if king_col != 4:
+        return False
+
+    king = board[king_row][king_col]
+    rook = board[king_row][king_col + 3]
+
+    if not king or not rook or king.has_moved or rook.has_moved:
+        return False
+
+    # Check that king and rook are there and no pieces between them
+    return board[king_row][king_col + 1] is None and board[king_row][king_col + 2] is None
+    
+def can_castle_queenside(board, king_row, king_col):
+    if king_col != 4:
+        return False
+
+    king = board[king_row][king_col]
+    rook = board[king_row][king_col - 4]
+
+    if not king or not rook or king.has_moved or rook.has_moved:
+        return False
+
+    return board[king_row][king_col - 1] is None and board[king_row][king_col - 2] is None and board[king_row][king_col - 3] is None
+    
+
+# TODO: here is where we wanna add castling
 def get_king_moves(board, row, col):
     moves = []
     piece = board[row][col]
@@ -161,4 +188,11 @@ def get_king_moves(board, row, col):
             if other_piece is None or other_piece.team != piece.team:
                 moves.append([move_row, move_col])
 
+    if can_castle_kingside(board, row, col):
+        moves.append([row, col + 2])
+
+    if can_castle_queenside(board, row, col):
+        moves.append([row, col - 2])
+    
     return moves
+
