@@ -26,41 +26,26 @@ def get_pawn_attacks(board, row, col):
 
     return pawn_attacks
 
-def get_pawn_moves_white(board, row, col):
-    pawn_moves = []
-    # Can go forward 1 step if there's no piece there
-    if board[row - 1][col] is None:
-        pawn_moves.append([row - 1, col])
-
-    # Can go forward 2 steps if on starting row and no pieces in the way    
-    if (row == 6) and board[row - 1][col] is None and board[row - 2][col] is None:
-        pawn_moves.append([row - 2, col])
-    
-    pawn_moves.extend(get_pawn_attacks(board, row, col))
-
-    return pawn_moves
-
-def get_pawn_moves_black(board, row, col):
-    pawn_moves = []
-    # Can go forward 1 step if there's no piece there
-    if board[row + 1][col] is None:
-        pawn_moves.append([row + 1, col])
-
-    # Can go forward 2 steps if on starting row and no pieces in the way    
-    if (row == 1) and board[row + 1][col] is None and board[row + 2][col] is None:
-        pawn_moves.append([row + 2, col])
-    
-    pawn_moves.extend(get_pawn_attacks(board, row, col))
-
-    return pawn_moves
-
 def get_pawn_moves(board, row, col):
-    piece = board[row][col]
+    pawn_moves = []
 
-    if piece.team == "white":
-        return get_pawn_moves_white(board, row, col)
-    else:
-        return get_pawn_moves_black(board, row, col)
+    pawn = board[row][col]
+    current_team = pawn.team
+
+    row_delta = -1 if current_team == "white" else 1
+    starting_row = 6 if current_team == "white" else 1
+
+    # Can go forward 1 step if there's no piece there
+    if board[row + row_delta][col] is None:
+        pawn_moves.append([row + row_delta, col])
+
+    # Can go forward 2 steps if on starting row and no pieces in the way    
+    if (row == starting_row) and board[row + row_delta][col] is None and board[row + (row_delta * 2)][col] is None:
+        pawn_moves.append([row + (row_delta * 2), col])
+    
+    pawn_moves.extend(get_pawn_attacks(board, row, col))
+
+    return pawn_moves
     
 def is_valid_coordinate(row, col):
     return row in range(8) and col in range(8)
@@ -245,25 +230,12 @@ def is_square_attacked(board, square, current_turn):
 
     return False
     
-# Later: https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
-def print_piece(piece):
-    if piece is None:
-        print(".", end =" ")
-        return
 
-    piece_type = piece.piece_type
-    if (piece.team == "white"):
-        print(piece_type, end =" ")
-    else:
-        print(piece_type.lower(), end =" ")
 
-def print_board(board, current_turn):
-    for i in range(8):
-        for j in range(8):
-            print_piece(board[i][j])
-        print("\r")
-    print("Current turn: " + current_turn)
-    print("\r")
+def is_king_checked(board, current_turn):
+    king_square = get_king_square(board, current_turn)
+
+    return is_square_attacked(board, king_square, current_turn)
 
 # Filters moves for whether there's a check
 def get_non_checked_moves(board, current_turn, piece_moves):

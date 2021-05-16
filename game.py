@@ -1,5 +1,6 @@
 from moves import *
 from piece import *
+from display import *
 from enum import Enum  
 
 class IllegalMoveError(Exception):
