@@ -16,9 +16,9 @@ class TestGame(unittest.TestCase):
         self.board[6][4] = white_pawn
 
         game = Game(self.board)
-        game.make_move("e2e3")
+        game.apply_move("e2e3")
 
-        self.assertEqual(game.board[5][4], white_pawn)
+        self.assertEqual(game.board[5][4].piece_type, "P")
         self.assertIsNone(game.board[6][4])
 
     def test_castleKingside(self):
@@ -30,10 +30,10 @@ class TestGame(unittest.TestCase):
 
         game = Game(self.board)
 
-        game.make_move("e1g1")
+        game.apply_move("e1g1")
 
-        self.assertEqual(game.board[7][5], white_rook)
-        self.assertEqual(game.board[7][6], white_king)
+        self.assertEqual(game.board[7][5].piece_type, "R")
+        self.assertEqual(game.board[7][6].piece_type, "K")
 
     def test_castleKingside_black(self):
         black_king = Piece("black", "K")
@@ -45,10 +45,10 @@ class TestGame(unittest.TestCase):
         game = Game(self.board)
         game.current_turn = "black"
 
-        game.make_move("e8g8")
+        game.apply_move("e8g8")
 
-        self.assertEqual(game.board[0][5], black_rook)
-        self.assertEqual(game.board[0][6], black_king)
+        self.assertEqual(game.board[0][5].piece_type, "R")
+        self.assertEqual(game.board[0][6].piece_type, "K")
     
     def test_castleQueenside(self):
         white_king = Piece("white", "K")
@@ -59,10 +59,10 @@ class TestGame(unittest.TestCase):
 
         game = Game(self.board)
 
-        game.make_move("e1c1")
+        game.apply_move("e1c1")
 
-        self.assertEqual(game.board[7][2], white_king)
-        self.assertEqual(game.board[7][3], white_rook)
+        self.assertEqual(game.board[7][2].piece_type, "K")
+        self.assertEqual(game.board[7][3].piece_type, "R")
         
     def test_castleKingsideKingMoved(self):
         white_king = Piece("white", "K")
@@ -72,12 +72,36 @@ class TestGame(unittest.TestCase):
         self.board[7][7] = white_rook
 
         game = Game(self.board)
-        game.make_move("e1f1")
+        game.apply_move("e1f1")
         game.current_turn = "white"
-        game.make_move("f1e1")
+        game.apply_move("f1e1")
         game.current_turn = "white"
 
-        self.assertRaises(IllegalMoveError, game.make_move,"e1g1")
+        self.assertRaises(IllegalMoveError, game.apply_move,"e1g1")
+    
+    def test_cantMoveKingIntoCheck(self):
+        white_king = Piece("white", "K")
+        black_bishop = Piece("black", "B")
+
+        self.board[7][4] = white_king
+        self.board[6][4] = black_bishop
+        
+        game = Game(self.board)
+        
+        self.assertRaises(IllegalMoveError, game.apply_move, "e1f1")
+
+    def test_canMoveKingInFrontOfPawn(self):
+        white_king = Piece("white", "K")
+        black_pawn = Piece("black", "P")
+
+        self.board[7][4] = white_king
+        self.board[6][3] = black_pawn
+
+        game = Game(self.board)
+
+        game.apply_move("e1d1")
+
+        self.assertEqual(game.board[7][3].piece_type, "K")
 
 if __name__ == '__main__':
     unittest.main()

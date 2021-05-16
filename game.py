@@ -5,8 +5,6 @@ from enum import Enum
 class IllegalMoveError(Exception):
     pass
 
-# CONTINYA: Make sure we can run stuff with hypothetical board
-
 class Game:
     def __init__(self, board = None):
         if board is None:
@@ -49,42 +47,6 @@ class Game:
         else:
             self.current_turn = "white"
 
-    def get_piece_legal_moves(self, row, col):
-        #TODO: add the starting coordinate so we can simplify the helpers
-        piece = self.board[row][col]
-        if piece.piece_type == "P":
-            return get_pawn_moves(self.board, row, col)
-        elif piece.piece_type == "N":
-            return get_knight_moves(self.board, row, col)
-        elif piece.piece_type == "B":
-            return get_bishop_moves(self.board, row, col)
-        elif piece.piece_type == "R":
-            return get_rook_moves(self.board, row, col)
-        elif piece.piece_type == "Q":
-            return get_queen_moves(self.board, row, col) # this can be bishop and rook together
-        elif piece.piece_type == "K":
-            return get_king_moves(self.board, row, col)
-    
-    # Later: https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
-    def print_piece(self, piece):
-        if piece is None:
-            print(".", end =" ")
-            return
-
-        piece_type = piece.piece_type
-        if (piece.team == "white"):
-            print(piece_type, end =" ")
-        else:
-            print(piece_type.lower(), end =" ")
-
-    def print_board(self):
-        for i in range(8):
-            for j in range(8):
-                self.print_piece(self.board[i][j])
-            print("\r")
-        print("Current turn: " + self.current_turn)
-        print("\r")
-
     def move_square_to_coordinates(self, square):
         col = square[0].lower()
 
@@ -114,16 +76,7 @@ class Game:
     def move_to_coordinates(self, move):
         return [self.move_square_to_coordinates(move[:2]), self.move_square_to_coordinates(move[2:4])]
 
-    def move_is_kingside_castle(self, move):
-        start_coord, end_coord = move
-
-        return self.board[start_coord[0]][start_coord[1]].piece_type == "K" and start_coord[0] == end_coord[0] and (end_coord[1] - start_coord[1] == 2)
-
-    def move_is_queenside_castle(self, move):
-        start_coord, end_coord = move
-        return self.board[start_coord[0]][start_coord[1]].piece_type == "K" and start_coord[0] == end_coord[0] and (start_coord[1] - end_coord[1] == 2)
-
-    def make_move(self, move):
+    def apply_move(self, move):
         move = self.move_to_coordinates(move)
         legal_moves = self.get_legal_moves()
         
@@ -135,36 +88,11 @@ class Game:
         if moving_piece.piece_type in ("K", "R"):
             moving_piece.has_moved = True
 
-        if (self.move_is_kingside_castle(move)):
-            king = self.board[move[0][0]][move[0][1]]
-            rook = self.board[move[0][0]][move[0][1] + 3]
-
-            self.board[move[0][0]][move[0][1]] = None
-            self.board[move[0][0]][move[0][1] + 3] = None
-
-            self.board[move[0][0]][move[0][1] + 1] = rook
-            self.board[move[0][0]][move[0][1] + 2] = king
-
-        elif (self.move_is_queenside_castle(move)):
-            king = self.board[move[0][0]][move[0][1]]
-            rook = self.board[move[0][0]][move[0][1] - 4]
-
-            self.board[move[0][0]][move[0][1]] = None
-            self.board[move[0][0]][move[0][1] - 4] = None
-
-            self.board[move[0][0]][move[0][1] - 1] = rook
-            self.board[move[0][0]][move[0][1] - 2] = king
-            
-        else:
-            start_coord, end_coord = move
-            
-            self.board[end_coord[0]][end_coord[1]] = self.board[start_coord[0]][start_coord[1]]
-            self.board[start_coord[0]][start_coord[1]] = None
+        self.board = make_move(self.board, move)
 
         self.move_history.append(move)
         self.switch_turn()
 
-    # TODO: incorporate checks
     def get_legal_moves(self):
         legal_moves = []
 
@@ -175,17 +103,17 @@ class Game:
                     # Only look at the current player's pieces
                     
                     # Map in starting position of the piece
-                    piece_moves = list(map(lambda move: [[row, col], move], self.get_piece_legal_moves(row, col)))
+                    piece_moves = get_piece_legal_moves(self.board, row, col)
                     legal_moves.extend(piece_moves)
 
         return legal_moves
 
     def play_game(self):
         while True:
-            self.print_board()
+            print_board(self.board, self.current_turn)
             next_move = input("What's your move? E.g. e4e5\n")
             try:
-                self.make_move(next_move)
+                self.apply_move(next_move)
             except IllegalMoveError:
                 print("Illegal Move!")
 if __name__ == '__main__':

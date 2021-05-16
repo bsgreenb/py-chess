@@ -1,5 +1,42 @@
+import copy
+
 # TODO: handle queen promotion
 # TODO: add enpassant (QSTN: is this a pawn only capture?)
+
+def get_pawn_attacks(board, row, col):
+    piece = board[row][col]
+
+    if piece.team == "white":
+        return get_pawn_attacks_white(board, row, col)
+    else:
+        return get_pawn_attacks_black(board, row, col)
+
+def get_pawn_attacks_white(board, row, col):
+    pawn_attacks = []
+    
+    # Can take black pieces diagonal forward-left
+    if col != 0 and board[row - 1][col - 1] and board[row - 1][col - 1].team == "black":
+        pawn_attacks.append([row - 1, col - 1])
+
+    # Can take black pieces diagonal forward-right
+    if col != 7 and board[row - 1][col + 1] and board[row - 1][col + 1].team == "black":
+        pawn_attacks.append([row - 1, col + 1])
+
+    return pawn_attacks
+
+def get_pawn_attacks_black(board, row, col):
+    pawn_attacks = []
+
+    # Can take black pieces diagonal forward-right
+    if col != 0 and board[row + 1][col - 1] and board[row + 1][col - 1].team == "white":
+        pawn_attacks.append([row + 1, col - 1])
+
+    # Can take black pieces diagonal forward-left
+    if col != 7 and board[row + 1][col + 1] and board[row + 1][col + 1].team == "white":
+        pawn_attacks.append([row + 1, col + 1])
+
+    return pawn_attacks
+
 def get_pawn_moves_white(board, row, col):
     pawn_moves = []
     # Can go forward 1 step if there's no piece there
@@ -10,13 +47,7 @@ def get_pawn_moves_white(board, row, col):
     if (row == 6) and board[row - 1][col] is None and board[row - 2][col] is None:
         pawn_moves.append([row - 2, col])
     
-    # Can take black pieces diagonal forward-left
-    if col != 0 and board[row - 1][col - 1] and board[row - 1][col - 1].team == "black":
-        pawn_moves.append([row - 1, col - 1])
-
-    # Can take black pieces diagonal forward-right
-    if col != 7 and board[row - 1][col + 1] and board[row - 1][col + 1].team == "black":
-        pawn_moves.append([row - 1, col + 1])
+    pawn_moves.extend(get_pawn_attacks_white(board, row, col))
 
     return pawn_moves
 
@@ -30,13 +61,7 @@ def get_pawn_moves_black(board, row, col):
     if (row == 1) and board[row + 1][col] is None and board[row + 2][col] is None:
         pawn_moves.append([row + 2, col])
     
-    # Can take black pieces diagonal forward-right
-    if col != 0 and board[row + 1][col - 1] and board[row + 1][col - 1].team == "white":
-        pawn_moves.append([row + 1, col - 1])
-
-    # Can take black pieces diagonal forward-left
-    if col != 7 and board[row + 1][col + 1] and board[row + 1][col + 1].team == "white":
-        pawn_moves.append([row + 1, col + 1])
+    pawn_moves.extend(get_pawn_attacks_black(board, row, col))
 
     return pawn_moves
 
@@ -195,4 +220,137 @@ def get_king_moves(board, row, col):
         moves.append([row, col - 2])
     
     return moves
+
+def move_is_kingside_castle(board, move):
+    start_coord, end_coord = move
+    piece = board[start_coord[0]][start_coord[1]]
+
+    return piece and piece.piece_type == "K" and start_coord[0] == end_coord[0] and (end_coord[1] - start_coord[1] == 2)
+
+def move_is_queenside_castle(board, move):
+    start_coord, end_coord = move
+    piece = board[start_coord[0]][start_coord[1]]
+
+    return piece and piece.piece_type == "K" and start_coord[0] == end_coord[0] and (start_coord[1] - end_coord[1] == 2)
+
+
+# Gets the square of the current turn's king
+def get_king_square(board, current_turn):
+    for row in range(8):
+        for col in range(8):
+            piece = board[row][col]
+            if piece and piece.piece_type == "K" and piece.team == current_turn:
+                return [row, col]
+
+# TODO: address the issue with each side being in check.
+def is_square_attacked(board, square, current_turn):
+    # Loop through each of the opponents pieces and return True if we find one attacking the square
+    for row in range(8):
+        for col in range(8):
+            piece = board[row][col]
+            if piece and piece.team != current_turn:
+                piece_attacks = get_piece_attacks(board, row, col)
+                for piece_attack in piece_attacks:
+                    if square == piece_attack[1]:
+                        return True
+
+    return False
+    
+# Later: https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
+def print_piece(piece):
+    if piece is None:
+        print(".", end =" ")
+        return
+
+    piece_type = piece.piece_type
+    if (piece.team == "white"):
+        print(piece_type, end =" ")
+    else:
+        print(piece_type.lower(), end =" ")
+
+def print_board(board, current_turn):
+    for i in range(8):
+        for j in range(8):
+            print_piece(board[i][j])
+        print("\r")
+    print("Current turn: " + current_turn)
+    print("\r")
+
+# Filters moves for whether there's a check
+def get_non_checked_moves(board, current_turn, piece_moves):
+    non_checked_moves = []
+
+    for piece_move in piece_moves:
+        potential_board = make_move(board, piece_move)
+
+        king_square = get_king_square(potential_board, current_turn)
+
+        if not is_square_attacked(potential_board, king_square, current_turn):
+            non_checked_moves.append(piece_move)
+    
+    return non_checked_moves
+
+def get_piece_attacks(board, row, col):
+    piece = board[row][col]
+    if piece.piece_type == "P":
+        return get_pawn_attacks(board, row, col)
+    else:
+        return get_piece_legal_moves(board, row, col, True)
+
+def get_piece_legal_moves(board, row, col, allow_check = False):
+    piece = board[row][col]
+    current_turn = piece.team
+
+    if piece.piece_type == "P":
+        piece_moves = get_pawn_moves(board, row, col)
+    elif piece.piece_type == "N":
+        piece_moves = get_knight_moves(board, row, col)
+    elif piece.piece_type == "B":
+        piece_moves = get_bishop_moves(board, row, col)
+    elif piece.piece_type == "R":
+        piece_moves = get_rook_moves(board, row, col)
+    elif piece.piece_type == "Q":
+        piece_moves = get_queen_moves(board, row, col) # this can be bishop and rook together
+    elif piece.piece_type == "K":
+        piece_moves = get_king_moves(board, row, col)
+
+    # Add back starting coordinate
+    piece_moves = list(map(lambda move: [[row, col], move], piece_moves))
+
+    if allow_check:
+        return piece_moves
+    else:
+        return get_non_checked_moves(board, current_turn, piece_moves)
+
+# Returns a hypothetical board when a move is made.  Apply_move uses this, as does get_legal_moves, for checking hypothetical board for check etc.
+def make_move(board, move):
+    board = copy.deepcopy(board)
+    if (move_is_kingside_castle(board, move)):
+        king = board[move[0][0]][move[0][1]]
+        rook = board[move[0][0]][move[0][1] + 3]
+
+        board[move[0][0]][move[0][1]] = None
+        board[move[0][0]][move[0][1] + 3] = None
+
+        board[move[0][0]][move[0][1] + 1] = rook
+        board[move[0][0]][move[0][1] + 2] = king
+
+    elif (move_is_queenside_castle(board, move)):
+        king = board[move[0][0]][move[0][1]]
+        rook = board[move[0][0]][move[0][1] - 4]
+
+        board[move[0][0]][move[0][1]] = None
+        board[move[0][0]][move[0][1] - 4] = None
+
+        board[move[0][0]][move[0][1] - 1] = rook
+        board[move[0][0]][move[0][1] - 2] = king
+        
+    else:
+        # Normal move
+        start_coord, end_coord = move
+        
+        board[end_coord[0]][end_coord[1]] = board[start_coord[0]][start_coord[1]]
+        board[start_coord[0]][start_coord[1]] = None
+
+    return board
 
