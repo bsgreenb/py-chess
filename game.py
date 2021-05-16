@@ -188,7 +188,8 @@ class Game:
                 self.make_move(next_move)
             except IllegalMoveError:
                 print("Illegal Move!")
-# game = Game()
-# game.play_game()
+if __name__ == '__main__':
+    game = Game()
+    game.play_game()
 
 #TODO: implement Game class, which will have board and turn variables instead of these globals
