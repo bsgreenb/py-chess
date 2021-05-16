@@ -4,36 +4,25 @@ import copy
 # TODO: add enpassant (QSTN: is this a pawn only capture?)
 
 def get_pawn_attacks(board, row, col):
-    piece = board[row][col]
-
-    if piece.team == "white":
-        return get_pawn_attacks_white(board, row, col)
-    else:
-        return get_pawn_attacks_black(board, row, col)
-
-def get_pawn_attacks_white(board, row, col):
-    pawn_attacks = []
-    
-    # Can take black pieces diagonal forward-left
-    if col != 0 and board[row - 1][col - 1] and board[row - 1][col - 1].team == "black":
-        pawn_attacks.append([row - 1, col - 1])
-
-    # Can take black pieces diagonal forward-right
-    if col != 7 and board[row - 1][col + 1] and board[row - 1][col + 1].team == "black":
-        pawn_attacks.append([row - 1, col + 1])
-
-    return pawn_attacks
-
-def get_pawn_attacks_black(board, row, col):
     pawn_attacks = []
 
-    # Can take black pieces diagonal forward-right
-    if col != 0 and board[row + 1][col - 1] and board[row + 1][col - 1].team == "white":
-        pawn_attacks.append([row + 1, col - 1])
+    pawn = board[row][col]
+    current_team = pawn.team
 
-    # Can take black pieces diagonal forward-left
-    if col != 7 and board[row + 1][col + 1] and board[row + 1][col + 1].team == "white":
-        pawn_attacks.append([row + 1, col + 1])
+    row_delta = -1 if current_team == "white" else 1
+    other_team = "black" if current_team == "white" else "white" 
+
+    for col_delta in (-1, 1):
+        attack_row = row + row_delta
+        attack_col = col + col_delta
+        
+        # Attack row will always be in range of the board because it gets promoted at end.
+        if attack_col not in range(7):
+            continue 
+
+        attacked_piece = board[attack_row][attack_col]
+        if (attacked_piece and attacked_piece.team == other_team):
+            pawn_attacks.append([attack_row, attack_col])
 
     return pawn_attacks
 
@@ -47,7 +36,7 @@ def get_pawn_moves_white(board, row, col):
     if (row == 6) and board[row - 1][col] is None and board[row - 2][col] is None:
         pawn_moves.append([row - 2, col])
     
-    pawn_moves.extend(get_pawn_attacks_white(board, row, col))
+    pawn_moves.extend(get_pawn_attacks(board, row, col))
 
     return pawn_moves
 
@@ -61,7 +50,7 @@ def get_pawn_moves_black(board, row, col):
     if (row == 1) and board[row + 1][col] is None and board[row + 2][col] is None:
         pawn_moves.append([row + 2, col])
     
-    pawn_moves.extend(get_pawn_attacks_black(board, row, col))
+    pawn_moves.extend(get_pawn_attacks(board, row, col))
 
     return pawn_moves
 

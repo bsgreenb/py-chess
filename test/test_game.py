@@ -103,5 +103,8 @@ class TestGame(unittest.TestCase):
 
         self.assertEqual(game.board[7][3].piece_type, "K")
 
+    # def test_cantDiscoverSelfCheck(self):
+    #     # CONTINYA on writing this one out
+
 if __name__ == '__main__':
     unittest.main()
