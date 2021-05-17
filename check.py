@@ -31,7 +31,7 @@ def get_non_checked_moves(board, current_turn, piece_moves):
     non_checked_moves = []
 
     for piece_move in piece_moves:
-        potential_board = moves.make_move(board, piece_move)
+        potential_board = moves.make_move(board, piece_move, False)
 
         king_square = get_king_square(potential_board, current_turn)
 

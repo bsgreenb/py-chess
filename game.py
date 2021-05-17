@@ -1,6 +1,5 @@
 import moves
 import display
-import check
 
 class IllegalMoveError(Exception):
     pass
@@ -123,7 +122,19 @@ class Game:
             except IllegalMoveError:
                 print("Illegal Move!")
 if __name__ == '__main__':
-    game = Game()
+
+    white_king = Piece("white", "K")
+    black_king = Piece("black", "K")
+    white_pawn = Piece("white", "P")
+    black_pawn = Piece("black", "P")
+
+    board = [[None for col in range(8)] for row in range(8)]
+    board[7][4] = white_king
+    board[0][4] = black_king
+    board[1][2] = white_pawn
+    board[6][2] = black_pawn
+
+    game = Game(board)
     game.play_game()
 
 #TODO: implement Game class, which will have board and turn variables instead of these globals

@@ -94,3 +94,6 @@ class TestGame(unittest.TestCase):
         game = Game(self.board)
 
         self.assertRaises(IllegalMoveError, game.apply_move, "e1c1")
+
+if __name__ == '__main__':
+    unittest.main()

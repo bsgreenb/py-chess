@@ -1,6 +1,7 @@
 import copy
 import castle
 import check
+import game
 
 # TODO: handle queen promotion
 # TODO: add enpassant (QSTN: is this a pawn only capture?)
@@ -204,8 +205,14 @@ def get_piece_legal_moves(board, row, col, allow_check = False):
     else:
         return check.get_non_checked_moves(board, current_turn, piece_moves)
 
+def move_is_promotion(board, move):
+    start_coord = move[0]
+
+    pawn = board[start_coord[0]][start_coord[1]]
+    return pawn.piece_type == "P" and ((pawn.team == "white" and start_coord[0] == 1) or (pawn.team == "black" and start_coord[0] == 6))
+
 # Returns a hypothetical board when a move is made.  Apply_move uses this, as does get_legal_moves, for checking hypothetical board for check etc.
-def make_move(board, move):
+def make_move(board, move, promotion_query = True):
     board = copy.deepcopy(board)
     if (castle.move_is_kingside_castle(board, move)):
         king = board[move[0][0]][move[0][1]]
@@ -226,6 +233,24 @@ def make_move(board, move):
 
         board[move[0][0]][move[0][1] - 1] = rook
         board[move[0][0]][move[0][1] - 2] = king
+
+    elif (move_is_promotion(board, move)):
+        start_coord, end_coord = move
+
+        pawn = board[start_coord[0]][start_coord[1]]
+
+        # This function is used to look up hypothetical moves, so for those, rather than shooting an inappropriate input, assume queen promotion.  
+        if promotion_query:
+            promotion_piece = input("What piece do you want? e.g. Q")
+        else:
+            promotion_piece = "Q"
+        if promotion_piece not in ["Q", "R", "B", "N"]:
+            raise(game.IllegalMoveError)
+        else:
+            new_piece = game.Piece(pawn.team, promotion_piece)
+
+            board[end_coord[0]][end_coord[1]] = new_piece
+            board[start_coord[0]][start_coord[1]] = None
         
     else:
         # Normal move
