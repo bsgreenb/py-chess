@@ -1,4 +1,6 @@
 import copy
+import castle
+import check
 
 # TODO: handle queen promotion
 # TODO: add enpassant (QSTN: is this a pawn only capture?)
@@ -144,31 +146,6 @@ def get_queen_moves(board, row, col):
     moves.extend(get_rook_moves(board, row, col))
     
     return moves
-
-def can_castle_kingside(board, king_row, king_col):
-    if king_col != 4:
-        return False
-
-    king = board[king_row][king_col]
-    rook = board[king_row][king_col + 3]
-
-    if not king or not rook or king.has_moved or rook.has_moved:
-        return False
-
-    # Check that king and rook are there and no pieces between them
-    return board[king_row][king_col + 1] is None and board[king_row][king_col + 2] is None
-    
-def can_castle_queenside(board, king_row, king_col):
-    if king_col != 4:
-        return False
-
-    king = board[king_row][king_col]
-    rook = board[king_row][king_col - 4]
-
-    if not king or not rook or king.has_moved or rook.has_moved:
-        return False
-
-    return board[king_row][king_col - 1] is None and board[king_row][king_col - 2] is None and board[king_row][king_col - 3] is None
     
 
 # TODO: here is where we wanna add castling
@@ -187,69 +164,13 @@ def get_king_moves(board, row, col):
             if other_piece is None or other_piece.team != piece.team:
                 moves.append([move_row, move_col])
 
-    if can_castle_kingside(board, row, col):
+    if castle.can_castle_kingside(board, row, col):
         moves.append([row, col + 2])
 
-    if can_castle_queenside(board, row, col):
+    if castle.can_castle_queenside(board, row, col):
         moves.append([row, col - 2])
     
     return moves
-
-def move_is_kingside_castle(board, move):
-    start_coord, end_coord = move
-    piece = board[start_coord[0]][start_coord[1]]
-
-    return piece and piece.piece_type == "K" and start_coord[0] == end_coord[0] and (end_coord[1] - start_coord[1] == 2)
-
-def move_is_queenside_castle(board, move):
-    start_coord, end_coord = move
-    piece = board[start_coord[0]][start_coord[1]]
-
-    return piece and piece.piece_type == "K" and start_coord[0] == end_coord[0] and (start_coord[1] - end_coord[1] == 2)
-
-
-# Gets the square of the current turn's king
-def get_king_square(board, current_turn):
-    for row in range(8):
-        for col in range(8):
-            piece = board[row][col]
-            if piece and piece.piece_type == "K" and piece.team == current_turn:
-                return [row, col]
-
-# TODO: address the issue with each side being in check.
-def is_square_attacked(board, square, current_turn):
-    # Loop through each of the opponents pieces and return True if we find one attacking the square
-    for row in range(8):
-        for col in range(8):
-            piece = board[row][col]
-            if piece and piece.team != current_turn:
-                piece_attacks = get_piece_attacks(board, row, col)
-                for piece_attack in piece_attacks:
-                    if square == piece_attack[1]:
-                        return True
-
-    return False
-    
-
-
-def is_king_checked(board, current_turn):
-    king_square = get_king_square(board, current_turn)
-
-    return is_square_attacked(board, king_square, current_turn)
-
-# Filters moves for whether there's a check
-def get_non_checked_moves(board, current_turn, piece_moves):
-    non_checked_moves = []
-
-    for piece_move in piece_moves:
-        potential_board = make_move(board, piece_move)
-
-        king_square = get_king_square(potential_board, current_turn)
-
-        if not is_square_attacked(potential_board, king_square, current_turn):
-            non_checked_moves.append(piece_move)
-    
-    return non_checked_moves
 
 def get_piece_attacks(board, row, col):
     piece = board[row][col]
@@ -281,12 +202,12 @@ def get_piece_legal_moves(board, row, col, allow_check = False):
     if allow_check:
         return piece_moves
     else:
-        return get_non_checked_moves(board, current_turn, piece_moves)
+        return check.get_non_checked_moves(board, current_turn, piece_moves)
 
 # Returns a hypothetical board when a move is made.  Apply_move uses this, as does get_legal_moves, for checking hypothetical board for check etc.
 def make_move(board, move):
     board = copy.deepcopy(board)
-    if (move_is_kingside_castle(board, move)):
+    if (castle.move_is_kingside_castle(board, move)):
         king = board[move[0][0]][move[0][1]]
         rook = board[move[0][0]][move[0][1] + 3]
 
@@ -296,7 +217,7 @@ def make_move(board, move):
         board[move[0][0]][move[0][1] + 1] = rook
         board[move[0][0]][move[0][1] + 2] = king
 
-    elif (move_is_queenside_castle(board, move)):
+    elif (castle.move_is_queenside_castle(board, move)):
         king = board[move[0][0]][move[0][1]]
         rook = board[move[0][0]][move[0][1] - 4]
 

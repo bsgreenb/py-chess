@@ -1,4 +1,4 @@
-from moves import is_king_checked
+from check import is_king_checked
 
 # Later: https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
 def print_piece(piece):

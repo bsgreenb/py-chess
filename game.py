@@ -1,10 +1,15 @@
-from moves import *
-from piece import *
-from display import *
-from enum import Enum  
+import moves
+import display
+import check
 
 class IllegalMoveError(Exception):
     pass
+
+class Piece:
+    def __init__(self, team, piece_type):
+        self.team = team
+        self.piece_type = piece_type
+        self.has_moved = None
 
 class Game:
     def __init__(self, board = None):
@@ -89,7 +94,7 @@ class Game:
         if moving_piece.piece_type in ("K", "R"):
             moving_piece.has_moved = True
 
-        self.board = make_move(self.board, move)
+        self.board = moves.make_move(self.board, move)
 
         self.move_history.append(move)
         self.switch_turn()
@@ -104,14 +109,14 @@ class Game:
                     # Only look at the current player's pieces
                     
                     # Map in starting position of the piece
-                    piece_moves = get_piece_legal_moves(self.board, row, col)
+                    piece_moves = moves.get_piece_legal_moves(self.board, row, col)
                     legal_moves.extend(piece_moves)
 
         return legal_moves
 
     def play_game(self):
         while True:
-            print_board(self.board, self.current_turn)
+            display.print_board(self.board, self.current_turn)
             next_move = input("What's your move? E.g. e4e5\n")
             try:
                 self.apply_move(next_move)
