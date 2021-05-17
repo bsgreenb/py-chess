@@ -11,9 +11,11 @@ class TestGame(unittest.TestCase):
     def test_castleKingside(self):
         white_king = Piece("white", "K")
         white_rook = Piece("white", "R")
+        black_king = Piece("black", "K")
 
         self.board[7][4] = white_king
         self.board[7][7] = white_rook
+        self.board[0][4] = black_king
 
         game = Game(self.board)
 

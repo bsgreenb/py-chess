@@ -7,10 +7,28 @@ def print_piece(piece):
         return
 
     piece_type = piece.piece_type
+
+    white_display = {
+        "K": "♚",
+        "Q": "♕",
+        "R": "♖",
+        "B": "♗",
+        "N": "♘",
+        "P": "♙"
+    }
+    black_display = {
+        "K": "♚",
+        "Q": "♛",
+        "R": "♜",
+        "B": "♝",
+        "N": "♞",
+        "P": "♟︎"
+    }
+
     if (piece.team == "white"):
-        print(piece_type, end =" ")
+        print(white_display[piece_type], end = " ")
     else:
-        print(piece_type.lower(), end =" ")
+        print(black_display[piece_type], end = " ")
 
 def print_board(board, current_turn):
     print("\r")

@@ -8,7 +8,6 @@ def get_king_square(board, current_turn):
             if piece and piece.piece_type == "K" and piece.team == current_turn:
                 return [row, col]
 
-# TODO: address the issue with each side being in check.
 def is_square_attacked(board, square, current_turn):
     # Loop through each of the opponents pieces and return True if we find one attacking the square
     for row in range(8):

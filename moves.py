@@ -148,8 +148,7 @@ def get_queen_moves(board, row, col):
     return moves
     
 
-# TODO: here is where we wanna add castling
-def get_king_moves(board, row, col):
+def get_king_moves(board, row, col, allow_check = False):
     moves = []
     piece = board[row][col]
 
@@ -164,10 +163,11 @@ def get_king_moves(board, row, col):
             if other_piece is None or other_piece.team != piece.team:
                 moves.append([move_row, move_col])
 
-    if castle.can_castle_kingside(board, row, col):
+    # Prevent infinite loop of checking kings for check
+    if castle.can_castle_kingside(board, row, col, allow_check):
         moves.append([row, col + 2])
 
-    if castle.can_castle_queenside(board, row, col):
+    if castle.can_castle_queenside(board, row, col, allow_check):
         moves.append([row, col - 2])
     
     return moves
@@ -194,7 +194,7 @@ def get_piece_legal_moves(board, row, col, allow_check = False):
     elif piece.piece_type == "Q":
         piece_moves = get_queen_moves(board, row, col) # this can be bishop and rook together
     elif piece.piece_type == "K":
-        piece_moves = get_king_moves(board, row, col)
+        piece_moves = get_king_moves(board, row, col, allow_check)
 
     # Add back starting coordinate
     piece_moves = list(map(lambda move: [[row, col], move], piece_moves))
