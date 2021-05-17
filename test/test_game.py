@@ -90,6 +90,21 @@ class TestGame(unittest.TestCase):
         
         self.assertRaises(IllegalMoveError, game.apply_move, "e1f1")
 
+    def test_cantDiscoverSelfCheck(self):
+        white_king = Piece("white", "K")
+        white_pawn = Piece("white", "P")
+        black_bishop = Piece("black", "B")
+
+        self.board[7][4] = white_king
+        self.board[6][3] = white_pawn
+        self.board[5][2] = black_bishop
+        
+        game = Game(self.board)
+
+        print_board(game.board, "white")
+        
+        self.assertRaises(IllegalMoveError, game.apply_move, "d2d3")
+
     def test_canMoveKingInFrontOfPawn(self):
         white_king = Piece("white", "K")
         black_pawn = Piece("black", "P")
@@ -103,8 +118,8 @@ class TestGame(unittest.TestCase):
 
         self.assertEqual(game.board[7][3].piece_type, "K")
 
-    # def test_cantDiscoverSelfCheck(self):
-    #     # CONTINYA on writing this one out
+    
+        
 
 if __name__ == '__main__':
     unittest.main()

@@ -13,6 +13,7 @@ def print_piece(piece):
         print(piece_type.lower(), end =" ")
 
 def print_board(board, current_turn):
+    print("\r")
     for i in range(8):
         for j in range(8):
             print_piece(board[i][j])
