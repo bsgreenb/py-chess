@@ -65,3 +65,30 @@ class TestGame(unittest.TestCase):
         game.current_turn = "white"
 
         self.assertRaises(IllegalMoveError, game.apply_move,"e1g1")
+
+    def test_cannotCastleIntoCheckKingSide(self):
+        white_king = Piece("white", "K")
+        white_rook = Piece("white", "R")
+        black_bishop = Piece("black", "B")
+
+        self.board[7][4] = white_king
+        self.board[7][7] = white_rook
+        self.board[5][7] = black_bishop
+
+        game = Game(self.board)
+
+        self.assertRaises(IllegalMoveError, game.apply_move, "e1g1")
+
+
+    def test_cannotCastleIntoCheckQueenSide(self):
+        white_king = Piece("white", "K")
+        white_rook = Piece("white", "R")
+        black_bishop = Piece("black", "B")
+
+        self.board[7][0] = white_rook
+        self.board[7][4] = white_king
+        self.board[5][2] = black_bishop
+
+        game = Game(self.board)
+
+        self.assertRaises(IllegalMoveError, game.apply_move, "e1c1")
