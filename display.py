@@ -10,20 +10,22 @@ def print_piece(piece):
 
     white_display = {
         "K": "♚",
-        "Q": "♕",
-        "R": "♖",
-        "B": "♗",
-        "N": "♘",
-        "P": "♙"
-    }
-    black_display = {
-        "K": "♚",
         "Q": "♛",
         "R": "♜",
         "B": "♝",
         "N": "♞",
         "P": "♟︎"
     }
+
+    black_display = {
+        "K": "♚",
+        "Q": "♕",
+        "R": "♖",
+        "B": "♗",
+        "N": "♘",
+        "P": "♙"
+    }
+    
 
     if (piece.team == "white"):
         print(white_display[piece_type], end = " ")
