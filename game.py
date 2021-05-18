@@ -1,5 +1,6 @@
 import moves
 import display
+import check
 
 class IllegalMoveError(Exception):
     pass
@@ -116,25 +117,27 @@ class Game:
     def play_game(self):
         while True:
             display.print_board(self.board, self.current_turn)
+            legal_moves = self.get_legal_moves()
+
+            if len(legal_moves) == 0:
+                if check.is_king_checked(self.board, self.current_turn):
+                    other_team = "white" if self.current_turn == "black" else "black"
+                    print(other_team + " wins by checkmate")
+                    return 1 if self.current_turn == "black" else -1
+                else:
+                    print("Game is a draw via stalemate")
+                    return 0
+            
+            if check.is_king_checked(self.board, self.current_turn):
+                print(self.current_turn + " is in Check!")
+
             next_move = input("What's your move? E.g. e4e5\n")
             try:
                 self.apply_move(next_move)
             except IllegalMoveError:
                 print("Illegal Move!")
 if __name__ == '__main__':
-
-    white_king = Piece("white", "K")
-    black_king = Piece("black", "K")
-    white_pawn = Piece("white", "P")
-    black_pawn = Piece("black", "P")
-
-    board = [[None for col in range(8)] for row in range(8)]
-    board[7][4] = white_king
-    board[0][4] = black_king
-    board[1][2] = white_pawn
-    board[6][2] = black_pawn
-
-    game = Game(board)
+    game = Game()
     game.play_game()
 
 #TODO: implement Game class, which will have board and turn variables instead of these globals

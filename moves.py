@@ -2,6 +2,7 @@ import copy
 import castle
 import check
 import game
+import display
 
 # TODO: handle queen promotion
 # TODO: add enpassant (QSTN: is this a pawn only capture?)
@@ -28,6 +29,7 @@ def get_pawn_attacks(board, row, col):
             pawn_attacks.append([attack_row, attack_col])
 
     return pawn_attacks
+
 
 def get_pawn_moves(board, row, col):
     pawn_moves = []
@@ -176,7 +178,7 @@ def get_king_moves(board, row, col, allow_check = False):
 def get_piece_attacks(board, row, col):
     piece = board[row][col]
     if piece.piece_type == "P":
-        return get_pawn_attacks(board, row, col)
+        return list(map(lambda move: [[row, col], move], get_pawn_attacks(board, row, col)))
     else:
         return get_piece_legal_moves(board, row, col, True)
 

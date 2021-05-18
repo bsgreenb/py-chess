@@ -1,4 +1,3 @@
-from check import is_king_checked
 
 # Later: https://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
 def print_piece(piece):
@@ -18,7 +17,7 @@ def print_piece(piece):
     }
 
     black_display = {
-        "K": "♚",
+        "K": "♔",
         "Q": "♕",
         "R": "♖",
         "B": "♗",
@@ -39,6 +38,4 @@ def print_board(board, current_turn):
             print_piece(board[i][j])
         print("\r")
     print("Current turn: " + current_turn)
-    if is_king_checked(board, current_turn):
-        print(current_turn + " is in Check!")
     print("\r")
